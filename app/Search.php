@@ -94,51 +94,61 @@ abstract class Search
      *
      * @return string
      */
-    public static function form(): string
-    {
-        $output = '';
-        $homepage_search = Setting::fetch('homepage_search');
-        $search_provider = Setting::where('key', '=', 'search_provider')->first();
-        $user_search_provider = Setting::fetch('search_provider');
-        //die(print_r($search_provider));
+public static function form(): string
+{
+    $output = '';
+    $homepage_search = Setting::fetch('homepage_search');
+    $search_provider = Setting::where('key', '=', 'search_provider')->first();
+    $user_search_provider = Setting::fetch('search_provider');
 
-        //die(var_dump($user_search_provider));
-        // return early if search isn't applicable
-        if ((bool) $homepage_search !== true) {
-            return $output;
-        }
-        $user_search_provider = Input::get('p') ?? $user_search_provider ?? 'none';
-
-        if ((bool) $search_provider) {
-            if ((bool) $user_search_provider) {
-                $name = 'app.options.'.$user_search_provider;
-                $provider = self::providerDetails($user_search_provider);
-
-                $output .= '<div class="searchform">';
-                $output .= '<form action="'.url('search').'"'.getLinkTargetAttribute().' method="get">';
-                $output .= '<div id="search-container" class="input-container">';
-                $output .= '<select name="provider">';
-                foreach (self::providers() as $key => $searchprovider) {
-                    $selected = ((string) $key === (string) $user_search_provider) ? ' selected="selected"' : '';
-                    $output .= '<option value="'.$key.'"'.$selected.'>'.$searchprovider['name'].'</option>';
-                }
-                $output .= '</select>';
-                $output .= Form::text(
-                    'q',
-                    Input::get('q') ?? null,
-                    [
-                        'class' => 'homesearch',
-                        'autofocus' => 'autofocus',
-                        'placeholder' => __('app.settings.search').'...'
-                    ]
-                );
-                $output .= '<button type="submit">'.ucwords(__('app.settings.search')).'</button>';
-                $output .= '</div>';
-                $output .= '</form>';
-                $output .= '</div>';
-            }
-        }
-
+    // return early if search isn't applicable
+    if ((bool) $homepage_search !== true) {
         return $output;
     }
+    $user_search_provider = Input::get('p') ?? $user_search_provider ?? 'none';
+
+    if ((bool) $search_provider) {
+        if ((bool) $user_search_provider) {
+            $name = 'app.options.'.$user_search_provider;
+            $provider = self::providerDetails($user_search_provider);
+
+            $output .= '<div class="searchform">';
+            $output .= '<form action="'.url('search').'"'.getLinkTargetAttribute().' method="get">';
+            $output .= '<div id="search-container" class="input-container">';
+            $output .= '<select name="provider">';
+            foreach (self::providers() as $key => $searchprovider) {
+                $selected = ((string) $key === (string) $user_search_provider) ? ' selected="selected"' : '';
+                $output .= '<option value="'.$key.'"'.$selected.'>'.$searchprovider['name'].'</option>';
+            }
+            $output .= '</select>';
+            $output .= Form::text(
+                'q',
+                Input::get('q') ?? null,
+                [
+                    'class' => 'homesearch',
+                    'autofocus' => 'autofocus',
+                    'placeholder' => __('app.settings.search').'...',
+                    'id' => 'searchBar' // Added id attribute
+                ]
+            );
+            $output .= '<button type="submit">'.ucwords(__('app.settings.search')).'</button>';
+            $output .= '</div>';
+            $output .= '</form>';
+            $output .= '</div>';
+            $output .= '<script>
+                            document.addEventListener("DOMContentLoaded", function() {
+                                var searchBar = document.getElementById("searchBar");
+                                if (searchBar) {
+                                    searchBar.addEventListener("click", function() {
+                                        this.select();
+                                    });
+                                }
+                            });
+                        </script>'; // Added JavaScript
+        }
+    }
+
+    return $output;
+}
+
 }
