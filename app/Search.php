@@ -144,7 +144,7 @@ public static function form(): string
                                     });
                                 }
                             });
-                        </script>'; // Added JavaScript
+                        </script>';
         }
     }
 
